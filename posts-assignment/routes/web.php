@@ -1,100 +1,32 @@
 <?php
 
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\PostController;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Http\Request;
-
-function getPosts() {
-    return session()->get('posts', []);
-}
-
-function savePosts($posts) {
-    session()->put('posts', $posts);
-}
 
 Route::get('/', function () {
-    return 'Laravel Assignment Started';
+    return redirect()->route('posts.index');
 });
 
-Route::get('/posts', function () {
-    $posts = getPosts();
-    return view('posts.index', compact('posts'));
+Route::middleware('guest')->group(function () {
+    Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
+    Route::post('/login', [AuthController::class, 'login'])->name('login.submit');
+    Route::get('/register', [AuthController::class, 'showRegister'])->name('register');
+    Route::post('/register', [AuthController::class, 'register'])->name('register.submit');
 });
 
-Route::get('/posts/create', function () {
-    return view('posts.create');
+Route::middleware('auth')->group(function () {
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 });
 
-Route::post('/posts', function (Request $request) {
-    $request->validate([
-        'title' => 'required|string|max:255',
-    ]);
+Route::get('/posts', [PostController::class, 'index'])->name('posts.index');
 
-    $posts = getPosts();
-
-    $posts[] = [
-        'title' => $request->title,
-    ];
-
-    savePosts($posts);
-
-    return redirect('/posts');
+Route::middleware('auth')->group(function () {
+    Route::get('/posts/create', [PostController::class, 'create'])->name('posts.create');
+    Route::post('/posts', [PostController::class, 'store'])->name('posts.store');
+    Route::get('/posts/{post}/edit', [PostController::class, 'edit'])->name('posts.edit');
+    Route::put('/posts/{post}', [PostController::class, 'update'])->name('posts.update');
+    Route::delete('/posts/{post}', [PostController::class, 'destroy'])->name('posts.destroy');
 });
 
-Route::get('/posts/{id}', function ($id) {
-    $posts = getPosts();
-
-    if (!isset($posts[$id])) {
-        abort(404);
-    }
-
-    $post = $posts[$id];
-
-    return view('posts.show', compact('post', 'id'));
-});
-
-Route::get('/posts/{id}/edit', function ($id) {
-    $posts = getPosts();
-
-    if (!isset($posts[$id])) {
-        abort(404);
-    }
-
-    $post = $posts[$id];
-
-    return view('posts.edit', compact('post', 'id'));
-});
-
-Route::put('/posts/{id}', function (Request $request, $id) {
-    $request->validate([
-        'title' => 'required|string|max:255',
-    ]);
-
-    $posts = getPosts();
-
-    if (!isset($posts[$id])) {
-        abort(404);
-    }
-
-    $posts[$id]['title'] = $request->title;
-
-    savePosts($posts);
-
-    return redirect('/posts');
-});
-
-Route::delete('/posts/{id}', function ($id) {
-    $posts = getPosts();
-
-    if (!isset($posts[$id])) {
-        abort(404);
-    }
-
-    unset($posts[$id]);
-
-    // reindex array
-    $posts = array_values($posts);
-
-    savePosts($posts);
-
-    return redirect('/posts');
-});
+Route::get('/posts/{post}', [PostController::class, 'show'])->name('posts.show');
