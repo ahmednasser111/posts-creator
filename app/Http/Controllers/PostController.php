@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StorePostRequest;
+use App\Http\Requests\UpdatePostRequest;
 use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -13,7 +15,7 @@ class PostController extends Controller
      */
     public function index()
     {
-        $posts = Post::with('user')->latest()->get();
+        $posts = Post::with('user')->latest()->paginate(10);
         return view('posts.index', compact('posts'));
     }
 
@@ -28,13 +30,9 @@ class PostController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StorePostRequest $request)
     {
-        $validated = $request->validate([
-            'title' => 'required|max:255',
-            'body' => 'required',
-        ]);
-
+        $validated = $request->validated();
         $validated['user_id'] = Auth::id();
         Post::create($validated);
 
@@ -46,6 +44,7 @@ class PostController extends Controller
      */
     public function show(Post $post)
     {
+        $post->load('comments.user');
         return view('posts.show', compact('post'));
     }
 
@@ -63,18 +62,13 @@ class PostController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Post $post)
+    public function update(UpdatePostRequest $request, Post $post)
     {
         if (Auth::id() !== $post->user_id) {
             abort(403, 'Unauthorized action.');
         }
 
-        $validated = $request->validate([
-            'title' => 'required|max:255',
-            'body' => 'required',
-        ]);
-
-        $post->update($validated);
+        $post->update($request->validated());
 
         return redirect()->route('posts.index')->with('success', 'Post updated successfully.');
     }
@@ -91,5 +85,16 @@ class PostController extends Controller
         $post->delete();
 
         return redirect()->route('posts.index')->with('success', 'Post deleted successfully.');
+    }
+
+    public function restore($id)
+    {
+        $post = Post::withTrashed()->findOrFail($id);
+        if (Auth::id() !== $post->user_id) {
+            abort(403, 'Unauthorized action.');
+        }
+        $post->restore();
+
+        return redirect()->route('posts.index')->with('success', 'Post restored successfully.');
     }
 }

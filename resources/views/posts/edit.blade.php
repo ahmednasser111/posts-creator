@@ -1,11 +1,4 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Edit Post</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="p-6">
-
+<x-layout title="Edit Post">
     <h1 class="text-2xl font-bold mb-4">Edit Post</h1>
 
     <form method="POST" action="{{ route('posts.update', $post) }}" class="max-w-md space-y-4">
@@ -43,6 +36,4 @@
     </form>
 
     <a href="{{ route('posts.index') }}" class="block mt-4 text-gray-600">Back</a>
-
-</body>
-</html>
+</x-layout>

@@ -1,11 +1,4 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Posts</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="p-6">
-
+<x-layout title="Posts">
     <h1 class="text-2xl font-bold mb-4">Posts</h1>
 
     @auth
@@ -35,6 +28,7 @@
             <div class="border p-4 mb-2">
                 <h2 class="font-bold">{{ $post->title }}</h2>
                 <p class="text-gray-600 text-sm">By {{ $post->user->name }}</p>
+                <p class="text-gray-500 text-xs">{{ $post->created_at->format('F j, Y, g:i a') }}</p>
 
                 <a href="{{ route('posts.show', $post) }}" class="text-blue-500">View</a>
                 @if(auth()->check() && auth()->id() === $post->user_id)
@@ -52,5 +46,24 @@
         @endforelse
     </div>
 
-</body>
-</html>
+    @if(auth()->check())
+        <div class="mt-6 border p-4">
+            <h3 class="font-bold mb-2">Deleted Posts</h3>
+            @forelse (\App\Models\Post::onlyTrashed()->where('user_id', auth()->id())->get() as $deletedPost)
+                <div class="border p-2 mb-2 bg-gray-100">
+                    <h4 class="font-semibold">{{ $deletedPost->title }}</h4>
+                    <form method="POST" action="{{ route('posts.restore', $deletedPost->id) }}" class="inline">
+                        @csrf
+                        <button class="bg-green-500 text-white px-2 py-1 rounded text-sm">Restore</button>
+                    </form>
+                </div>
+            @empty
+                <p class="text-gray-500">No deleted posts</p>
+            @endforelse
+        </div>
+    @endif
+
+    <div class="mt-6">
+        {{ $posts->links() }}
+    </div>
+</x-layout>

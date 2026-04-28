@@ -1,11 +1,4 @@
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Login</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-</head>
-<body class="p-6">
-
+<x-layout title="Login">
     <h1 class="text-2xl font-bold mb-4">Login</h1>
 
     @if(session('error'))
@@ -43,6 +36,4 @@
     </form>
 
     <p class="mt-4">Don't have an account? <a href="{{ route('register') }}" class="text-blue-500">Register</a></p>
-
-</body>
-</html>
+</x-layout>
