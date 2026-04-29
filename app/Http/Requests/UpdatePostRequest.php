@@ -25,6 +25,7 @@ class UpdatePostRequest extends FormRequest
         return [
             'title' => 'required|min:3|unique:posts,title,' . $this->post->id,
             'body' => 'required|min:10',
+            'image' => 'nullable|image|max:2048',
         ];
     }
 }

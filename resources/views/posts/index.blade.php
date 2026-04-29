@@ -26,6 +26,9 @@
     <div class="mt-6">
         @forelse ($posts as $post)
             <div class="border p-4 mb-2">
+                @if ($post->image)
+                    <img src="{{ asset('storage/posts/' . $post->image) }}" class="w-full h-48 object-cover mb-2">
+                @endif
                 <h2 class="font-bold">{{ $post->title }}</h2>
                 <p class="text-gray-600 text-sm">By {{ $post->user->name }}</p>
                 <p class="text-gray-500 text-xs">{{ $post->created_at->format('F j, Y, g:i a') }}</p>

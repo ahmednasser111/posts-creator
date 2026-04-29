@@ -2,6 +2,9 @@
     <h1 class="text-2xl font-bold mb-4">Post Details</h1>
 
     <div class="border p-4">
+        @if ($post->image)
+            <img src="{{ asset('storage/posts/' . $post->image) }}" class="w-full h-64 object-cover mb-4">
+        @endif
         <h2 class="text-xl font-semibold">{{ $post->title }}</h2>
         <p class="text-gray-600 text-sm mt-2">By {{ $post->user->name }}</p>
         <p class="text-gray-500 text-xs">{{ $post->created_at->format('F j, Y, g:i a') }}</p>

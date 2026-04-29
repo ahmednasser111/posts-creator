@@ -1,7 +1,7 @@
 <x-layout title="Edit Post">
     <h1 class="text-2xl font-bold mb-4">Edit Post</h1>
 
-    <form method="POST" action="{{ route('posts.update', $post) }}" class="max-w-md space-y-4">
+    <form method="POST" action="{{ route('posts.update', $post) }}" class="max-w-md space-y-4" enctype="multipart/form-data">
         @csrf
         @method('PUT')
 
@@ -20,12 +20,28 @@
 
         <div>
             <label class="block mb-1 font-medium">Body</label>
-            <textarea 
-                name="body" 
+            <textarea
+                name="body"
                 class="w-full border rounded px-3 py-2"
                 rows="5"
             >{{ $post->body }}</textarea>
             @error('body')
+                <p class="text-red-500 text-sm">{{ $message }}</p>
+            @enderror
+        </div>
+
+        <div>
+            <label class="block mb-1 font-medium">Image</label>
+            @if ($post->image)
+                <img src="{{ asset('storage/posts/' . $post->image) }}" class="w-32 h-32 object-cover mb-2">
+            @endif
+            <input
+                type="file"
+                name="image"
+                class="w-full border rounded px-3 py-2"
+                accept="image/*"
+            >
+            @error('image')
                 <p class="text-red-500 text-sm">{{ $message }}</p>
             @enderror
         </div>

@@ -7,6 +7,7 @@ use App\Http\Requests\UpdatePostRequest;
 use App\Models\Post;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Storage;
 
 class PostController extends Controller
 {
@@ -34,7 +35,15 @@ class PostController extends Controller
     {
         $validated = $request->validated();
         $validated['user_id'] = Auth::id();
-        Post::create($validated);
+
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $imageName = time() . '_' . $image->getClientOriginalName();
+            $path = $image->storeAs('posts', $imageName, 'public');
+            $validated['image'] = $imageName;
+        }
+
+        $post = Post::create($validated);
 
         return redirect()->route('posts.index')->with('success', 'Post created successfully.');
     }
@@ -68,7 +77,20 @@ class PostController extends Controller
             abort(403, 'Unauthorized action.');
         }
 
-        $post->update($request->validated());
+        $validated = $request->validated();
+
+        if ($request->hasFile('image')) {
+            if ($post->image && Storage::disk('public')->exists('posts/' . $post->image)) {
+                Storage::disk('public')->delete('posts/' . $post->image);
+            }
+
+            $image = $request->file('image');
+            $imageName = time() . '_' . $image->getClientOriginalName();
+            $image->storeAs('posts', $imageName, 'public');
+            $validated['image'] = $imageName;
+        }
+
+        $post->update($validated);
 
         return redirect()->route('posts.index')->with('success', 'Post updated successfully.');
     }
@@ -80,6 +102,10 @@ class PostController extends Controller
     {
         if (Auth::id() !== $post->user_id) {
             abort(403, 'Unauthorized action.');
+        }
+
+        if ($post->image && Storage::disk('public')->exists('posts/' . $post->image)) {
+            Storage::disk('public')->delete('posts/' . $post->image);
         }
 
         $post->delete();
