@@ -30,6 +30,9 @@
                     <img src="{{ asset('storage/posts/' . $post->image) }}" class="w-full h-48 object-cover mb-2">
                 @endif
                 <h2 class="font-bold">{{ $post->title }}</h2>
+                @if ($post->slug)
+                    <p class="text-gray-400 text-xs">Slug: {{ $post->slug }}</p>
+                @endif
                 <p class="text-gray-600 text-sm">By {{ $post->user->name }}</p>
                 <p class="text-gray-500 text-xs">{{ $post->created_at->format('F j, Y, g:i a') }}</p>
 
